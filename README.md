@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install with `source setup.sh`. Then `python interpreter_test.py` should pass all tests. Make your own tests in `test.lc` and run them with `python interpreter.py test.lc`.
+Install with `source setup.sh`. Then `python interpreter_test.py` should pass all tests. You can run your own program in `test.lc` with `python interpreter.py test.lc`. Comments start with `--`.
 
 ## Description
 
