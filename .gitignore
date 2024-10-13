@@ -1,0 +1,6 @@
+*.pyc
+.venv
+penv
+lenv
+.python-version
+.DS_Store
