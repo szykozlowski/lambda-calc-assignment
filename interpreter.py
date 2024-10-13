@@ -92,7 +92,6 @@ def linearize(ast):
         raise Exception('Unknown AST', ast)
 
 def main():
-    import sys
     if len(sys.argv) != 2:
         print("Usage: python interpreter.py <filename>", file=sys.stderr)
         sys.exit(1)

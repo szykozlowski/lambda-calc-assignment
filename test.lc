@@ -1,4 +1,6 @@
-(\x.x) a
+-- (\x.x) a
 -- (\x.\y.x) a b
 -- (\x.\y.y) a b
+(a)
+-- (\f.\x.f(f(f x))) (\f.\x.f(f x))
 

@@ -6,12 +6,16 @@ Install with `source setup.sh`. Then `python interpreter_test.py` should pass al
 
 ## Description
 
-Supports the standard rules for dropping parentheses with the possible exception of `\a.b \c.d e` which must be written as `\a.b (\c.d e)`. This aligns with standard practice in many functional programming languages and simplifies the grammar. As usual, the following expressions have the same abstract syntax trees:
+The [grammar](https://codeberg.org/alexhkurz/lambdaC-2024/src/branch/main/grammar.lark) supports the standard rules for dropping parentheses with the possible exception of `\a.b \c.d e` which must be written as `\a.b (\c.d e)`. This aligns with standard practice in many functional programming languages and simplifies the grammar. As usual, the following expressions have the same abstract syntax trees:
 
   - `a b c` = `(a b) c`
   - `\a. \b. c d` = `\a. (\b. c d)`
   
 Comments start with `--`.
+
+The workflow followed by the interpreter is defined in [`interpret()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/51a84c820052219a6ce9b7f221cf03db9bd02b0b/interpreter.py#L9-L14).
+
+The interesting functions are [`evaluate()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/51a84c820052219a6ce9b7f221cf03db9bd02b0b/interpreter.py#L37-L49) and [`substitute()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/51a84c820052219a6ce9b7f221cf03db9bd02b0b/interpreter.py#L65-L82).
 
 ## Exercises
 
