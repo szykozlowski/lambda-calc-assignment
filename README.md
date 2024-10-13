@@ -12,5 +12,5 @@ Supports the standard rules for dropping parentheses with the possible exception
 
 ## Exercises
 
-A [series of exercises](https://hackmd.io/@alexhkurz/S1R1F6_1yx) has been designed to help the student explore the material.
+A [series of exercises](https://hackmd.io/@alexhkurz/S1R1F6_1yx) has been designed to help students explore the material.
 
