@@ -15,7 +15,7 @@ Comments start with `--`.
 
 The workflow followed by the interpreter is defined in [`interpret()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/51a84c820052219a6ce9b7f221cf03db9bd02b0b/interpreter.py#L9-L14).
 
-The interesting functions are [`evaluate()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/51a84c820052219a6ce9b7f221cf03db9bd02b0b/interpreter.py#L37-L49) and [`substitute()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/51a84c820052219a6ce9b7f221cf03db9bd02b0b/interpreter.py#L65-L82).
+The interesting functions are [`evaluate()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/483feda11b3f9fbf52f8a5d932e37c0a0560a309/interpreter.py#L37-L50) and [`substitute()`](https://codeberg.org/alexhkurz/lambdaC-2024/src/commit/51a84c820052219a6ce9b7f221cf03db9bd02b0b/interpreter.py#L65-L82).
 
 ## Exercises
 
