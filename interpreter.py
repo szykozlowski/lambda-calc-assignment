@@ -35,15 +35,16 @@ class LambdaCalculusTransformer(Transformer):
 
 # reduce AST to normal form
 def evaluate(tree):
-    # print("Evaluating:", tree)
     if tree[0] == 'app':
         e1 = evaluate(tree[1])
         if e1[0] == 'lam':
-            # (\ e1[1] . e1[2]) tree[2] -> substitute(e1[2], e1[1], tree[2])
-            rhs = substitute(e1[2], e1[1],tree[2])
+            body = e1[2]
+            name = e1[1]
+            argument = evaluate(tree[2])
+            rhs = substitute(body, name, argument)
             result = evaluate(rhs) 
         else:
-            result = ('app', e1, tree[2]) # e1 tree[2]
+            result = ('app', e1, tree[2])
     else:
         result = tree
     return result
