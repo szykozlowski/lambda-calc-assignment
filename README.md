@@ -2,6 +2,8 @@
 
 ## Installation
 
+Requirements: `python` and `pip` and `pyenv`.
+
 Install with `source setup.sh`. Then `python interpreter_test.py` should pass all tests. You can run your own program in `test.lc` with `python interpreter.py test.lc`. 
 
 ## Description
