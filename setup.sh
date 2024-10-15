@@ -4,8 +4,6 @@ if [ -d "lenv" ]; then
     rm -rf lenv
 fi
 
-echo "Installing Python 3.12.4 with pyenv..."
-pyenv install 3.12.4
 echo "Setting local Python version to 3.12.4..."
 pyenv local 3.12.4
 
