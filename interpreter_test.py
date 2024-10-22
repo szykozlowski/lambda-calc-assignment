@@ -26,6 +26,9 @@ def test_parse():
     
     assert ast(r"x") == ('var', 'x')
     print(f"AST {MAGENTA}x{RESET} == ('var', 'x')")
+
+    assert ast(r"x y z p") == ('app', ('app', ('app', ('var', 'x'), ('var', 'y')), ('var', 'z')), ('var', 'p'))
+    print(f"AST {MAGENTA}x y z p{RESET} == ('app', ('app', ('app', ('var', 'x'), ('var', 'y')), ('var', 'z')), ('var', 'p'))")
     
     assert ast(r"(((x)) ((y)))") == ('app', ('var', 'x'), ('var', 'y'))
     print(f"AST {MAGENTA}(((x)) ((y))){RESET} == ('app', ('var', 'x'), ('var', 'y'))")
@@ -69,6 +72,9 @@ def test_substitute():
     # x [y/x] = y
     assert substitute(('var', 'x'), 'x', ('var', 'y')) == ('var', 'y')
     print(f"SUBST {MAGENTA}x [y/x]{RESET} == ('var', 'y')")
+
+    assert substitute(('var', 'x'), 'x', ('var', 'y')) == ('var', 'y')
+    print(f"SUBST {MAGENTA}x [y/x]{RESET} == ('var', 'y')")
     
     # \x.x [y/x] = (\x.x)
     assert substitute(('lam', 'x', ('var', 'x')), 'x', ('var', 'y')) == ('lam', 'x', ('var', 'x'))
@@ -91,6 +97,10 @@ def test_evaluate():
     # EVAL x == x
     assert linearize(evaluate(ast(r"x"))) == "x"
     print(f"EVAL {MAGENTA}x{RESET} == x")
+
+
+    assert linearize(evaluate(ast(r"x x x"))) == "((x x) x)"
+    print(f"EVAL {MAGENTA}x{RESET} == ((x x) x)")
     
     # EVAL x y == (x y)
     assert linearize(evaluate(ast(r"x y"))) == "(x y)"
@@ -101,6 +111,9 @@ def test_evaluate():
     print(f"EVAL {MAGENTA}x y z{RESET} == ((x y) z)")
     
     # EVAL x (y z) == (x (y z))
+
+    print(linearize(evaluate(ast(r"((\m. \n. m n) (\f. \x. f (f x))) (\f. \x. f (f (f x)))"))))
+    
     assert linearize(evaluate(ast(r"x (y z)"))) == "(x (y z))"
     print(f"EVAL {MAGENTA}x (y z){RESET} == (x (y z))")
     
