@@ -1,6 +1,7 @@
 import sys
 from lark import Lark, Transformer, Tree
 import lark
+import os
 
 print(f"Python version: {sys.version}")
 print(f"Lark version: {lark.__version__}")
@@ -34,17 +35,21 @@ class LambdaCalculusTransformer(Transformer):
         return str(token)
 
 # reduce AST to normal form
-def evaluate(tree):
+def evaluate(tree, depth = 0, source="initial"):
+    # print(f"{depth * '\t'}[ EVALUATION ] -> {source}\n{(depth + 1) * '\t'}LTree: {linearize(tree)}\n{(depth + 1) * '\t'}Tree: {tree}")
     if tree[0] == 'app':
-        e1 = evaluate(tree[1])
+        e1 = evaluate(tree[1], depth + 1, "E1")
         if e1[0] == 'lam':
             body = e1[2]
             name = e1[1]
-            argument = evaluate(tree[2])
-            rhs = substitute(body, name, argument)
-            result = evaluate(rhs) 
+            argument = evaluate(tree[2], depth + 1, "ARG")
+            rhs = substitute(body, name, argument, depth)
+            result = evaluate(rhs, depth + 1, "RESULT") 
         else:
             result = ('app', e1, tree[2])
+    elif tree[0] == 'lam':
+        body = evaluate(tree[2], depth + 1, "ELIF LAM")
+        result = ('lam', tree[1], body)
     else:
         result = tree
     return result
@@ -63,7 +68,8 @@ class NameGenerator:
 name_generator = NameGenerator()
 
 # beta reduction (apply a function to an argument)
-def substitute(tree, name, replacement):
+def substitute(tree, name, replacement, depth = 0):
+    # print(f"{'\t' * depth}[ SUBSTITUTION ]\n{(depth + 1) * '\t'}Tree: {linearize(tree)}\n{(depth + 1) * '\t'}Name: {name}\n{(depth + 1) * '\t'}Replacement: {linearize(replacement)}")
     # tree [replacement/name] = tree with all instances of 'name' replaced by 'replacement'
     if tree[0] == 'var':
         if tree[1] == name:
@@ -76,9 +82,9 @@ def substitute(tree, name, replacement):
             return tree
         else:
             new_name = name_generator.generate()
-            return ('lam', new_name, substitute(substitute(tree[2], tree[1], ('var', new_name)), name, replacement))
+            return ('lam', new_name, substitute(substitute(tree[2], tree[1], ('var', new_name), depth + 1), name, replacement, depth + 1))
     elif tree[0] == 'app':
-        return ('app', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
+        return ('app', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
     else:
         raise Exception('Unknown tree', tree)
 
@@ -93,13 +99,20 @@ def linearize(ast):
         raise Exception('Unknown AST', ast)
 
 def main():
+    import sys
     if len(sys.argv) != 2:
-        print("Usage: python interpreter.py <filename>", file=sys.stderr)
+        #print("Usage: python interpreter.py <filename or expression>", file=sys.stderr)
         sys.exit(1)
 
-    filename = sys.argv[1]
-    with open(filename, 'r') as file:
-        expression = file.read()
+    input_arg = sys.argv[1]
+
+    if os.path.isfile(input_arg):
+        # If the input is a valid file path, read from the file
+        with open(input_arg, 'r') as file:
+            expression = file.read()
+    else:
+        # Otherwise, treat the input as a direct expression
+        expression = input_arg
 
     result = interpret(expression)
     print(f"\033[95m{result}\033[0m")
