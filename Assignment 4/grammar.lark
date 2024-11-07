@@ -6,12 +6,15 @@
    | exp2
 ?exp2: exp2 exp3                    -> app
       | exp3
+?exp4: NUMBER                   -> num
+      | "(" exp1 ")"
 ?exp3: NAME                         -> var
+      | NUMBER           -> num
       | "(" exp ")"
+
 
 NAME: /[a-z_][a-zA-Z0-9_]*/         
 %import common.NUMBER
-
 %import common.WS
 %ignore WS
 

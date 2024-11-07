@@ -5,4 +5,4 @@ Outside the comments only one program is allowed.
 
 // (\x.x)a
 
-(\x.\y.y) a b
+(\x.\y.y) 1 + 2

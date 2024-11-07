@@ -22,7 +22,8 @@ class LambdaCalculusTransformer(Transformer):
     def lam(self, args):
         name, body = args
         return ('lam', str(name), body)
-
+    def NUMBER(self, args):
+        return 'num', float(args[0])
     def app(self, args):
         new_args = [(arg.data, arg.children[0]) if isinstance(arg, Tree) and arg.data == 'int' else arg for arg in args]
         return ('app', *new_args)
@@ -30,27 +31,39 @@ class LambdaCalculusTransformer(Transformer):
     def var(self, args):
         token, = args
         return ('var', str(token))
+    
+    def plus(self, args):
+        return ('plus', args[0], args[1])
 
     def NAME(self, token):
         return str(token)
 
 # reduce AST to normal form
 def evaluate(tree):
+    print("TREE: ", tree)
+
+    if tree[0] == 'num':
+        return tree[1]
     if tree[0] == 'app':
         e1 = evaluate(tree[1])
         if e1[0] == 'lam':
             body = e1[2]
             name = e1[1]
-            arg = tree[2]
-            rhs = substitute(body, name, arg)
-            result = evaluate(rhs)
-            pass
+            argument = evaluate(tree[2])
+            rhs = substitute(body, name, argument)
+            result = evaluate(rhs) 
         else:
             result = ('app', e1, tree[2])
-            pass
+    elif tree[0] == 'lam':
+        body = evaluate(tree[2])
+        result = ('lam', tree[1], body)
+    elif tree[0] == 'plus':
+        lhs = tree[1].children[0][1] if isinstance(tree, Tree) else evaluate(('num', tree[1]))
+        rhs = tree[2].children[0][1] if isinstance(tree, Tree) else evaluate(('num', tree[2]))
+        print(f"\tLHS: {lhs}\n\tRHS: {rhs}")
+        result = ('num', lhs + rhs)
     else:
         result = tree
-        pass
     return result
 
 # generate a fresh name 

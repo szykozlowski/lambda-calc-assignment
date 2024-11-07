@@ -115,7 +115,7 @@ def test_evaluate():
     print("\nevaluate(): All tests passed!\n")
 
 def test_interpret():
-    print(f"Testing x --> {interpret('x')}")
+    print(f"Testing x --> {interpret('1 + (3 + 5)')}")
     print(f"Testing x y --> {interpret('x y')}")
     input=r"\x.x"; output = interpret(input); print(f"Testing {input} --> {output}")
     input=r"(\x.x) y"; output = interpret(input); print(f"Testing {input} --> {output}")
