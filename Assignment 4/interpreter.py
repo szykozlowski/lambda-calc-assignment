@@ -86,19 +86,6 @@ def evaluate(tree, depth: int = 0):
         body = evaluate(tree[2], depth + 1)
         result = ('lam', tree[1], body)
         print(f"{'\t' * depth}[ NON-APP-LAM-RES ] {result}")
-    # elif tree[0] == 'plus':
-    #     print(f"PLUSING: {tree}")
-    #     result = evaluate(tree[1]) + evaluate(tree[2])
-    # elif tree[0] == 'minus':
-    #     result = evaluate(tree[1]) - evaluate(tree[2])
-    # elif tree[0] == 'mul':
-    #     result = evaluate(tree[1]) * evaluate(tree[2])
-    # elif tree[0] == 'div':
-    #     result = evaluate(tree[1]) / evaluate(tree[2])
-    # elif tree[0] == 'number':
-    #     return evaluate(tree[1])
-    # elif tree[0] == 'neg':
-    #     return -evaluate(tree[1])
     else:
         result = tree
         print(f"{'\t' * depth}[ NO-CHANGE-RES ] {result}")

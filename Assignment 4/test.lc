@@ -5,6 +5,11 @@ Outside the comments only one program is allowed.
 
 // (\x.x)a
 
-(\x.\y.\z.(x + y) * z) 3 4 -5
-// (\x.x + 1) 5
-// (\x.x) (---2)
+//(\x.\y.\z.(x + y) * z) 3 4 5
+(\x.\y.x+y) (-3) 5
+//-3+5
+//(\x.x) (---2) 
+//(\x.x) (1--2)             
+//(\x.x) (1---2)               
+//(\x.x + 1) 5              
+//(\x.x * x) 3
