@@ -115,8 +115,6 @@ def test_evaluate():
     print("\nevaluate(): All tests passed!\n")
 
 def test_interpret():
-    print(f"Testing x --> {interpret('1 + (3 + 5) + (9 + 11)')}")
-    print(f"Testing x y --> {interpret('x y')}")
     input=r"\x.x"; output = interpret(input); print(f"Testing {input} --> {output}")
     input=r"(\x.x) y"; output = interpret(input); print(f"Testing {input} --> {output}")
     input=r"(\x.\y.x y) y"; output = interpret(input); print(f"Testing {input} --> {output}")
@@ -124,11 +122,11 @@ def test_interpret():
     print("\ninterpret(): All tests passed!\n")
 
 if __name__ == "__main__":
-    # print(Fore.GREEN + "\nTEST PARSING\n" + Style.RESET_ALL); test_parse()
-    # print(Fore.GREEN + "\nTEST SUBSTITUTION\n" + Style.RESET_ALL); test_substitute()
-    # print(Fore.GREEN + "\nTEST EVALUATION\n" + Style.RESET_ALL); test_evaluate()
+    print(Fore.GREEN + "\nTEST PARSING\n" + Style.RESET_ALL); test_parse()
+    print(Fore.GREEN + "\nTEST SUBSTITUTION\n" + Style.RESET_ALL); test_substitute()
+    print(Fore.GREEN + "\nTEST EVALUATION\n" + Style.RESET_ALL); test_evaluate()
     # print(Fore.GREEN + "\nTEST INTERPRETATION\n" + Style.RESET_ALL); test_interpret()
 
     # print(linearize(evaluate(ast(r"(\x.x + 1) 5"))))
-    print(f"Testing x --> {interpret('1 + (3 + 5)')}")
+    # print(f"Testing x --> {interpret('1 + (3 + 5)')}")
 
