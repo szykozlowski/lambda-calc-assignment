@@ -2,6 +2,7 @@ import sys
 from lark import Lark, Transformer, Tree
 import lark
 import os
+from colorama import Fore, Style
 
 #print(f"Python version: {sys.version}")
 #print(f"Lark version: {lark.__version__}")
@@ -11,10 +12,9 @@ def interpret(source_code):
     cst = parser.parse(source_code)
     ast = LambdaCalculusTransformer().transform(cst)
     result = evaluate(ast)
+    print(Fore.GREEN + f"\nPRE-OPERATIONS RESULT (Normalized AST)\n{result}\n" + Style.RESET_ALL)
     result2 = evaluate2(result)
-    print(result)
-    print(result2)
-    # result = linearize(result)
+    print(Fore.GREEN + f"\nPOST-OPERATIONS RESULT\n{result2}\n" + Style.RESET_ALL)
     return result2
 
 # convert concrete syntax to CST
@@ -60,31 +60,32 @@ class LambdaCalculusTransformer(Transformer):
     # def NUMBER(self, token):
     #     return float(token)
 
-def evaluate(tree):
-    print(tree)
+def evaluate(tree, depth: int = 0):
+    print(f"{'\t' * depth}[ EVAL-1 ] {tree}")
     if isinstance(tree, (int, float, str)):
-        return tree
-    if isinstance(tree, Tree):
-        return evaluate((tree.data, *tree.children))
-    if tree[0] == 'app':
-        print(f"UNDER APP : {tree}")
-        print(tree[1])
+        result = tree
+    elif isinstance(tree, Tree):
+        result = evaluate((tree.data, *tree.children), depth + 1)
+    elif tree[0] == 'app':
+        print(f"{'\t' * depth}[ APP ] {tree[1]}")
         e1 = evaluate(tree[1])
-        print("gothisfar")
-        print(e1)
-        print(f"\t{e1}")
+        print(f"{'\t' * depth}[ E1-RES ] {e1}")
         if e1[0] == 'lam':
-            print("SUB TIME")
+            print(f"{'\t' * depth}[ LAM POST E1 ]")
             body = e1[2]
             name = e1[1]
-            argument = evaluate(tree[2])
-            rhs = substitute(body, name, argument)
-            result = evaluate(rhs) 
+            argument = evaluate(tree[2], depth + 1)
+            rhs = substitute(body, name, argument, depth)
+            result = evaluate(rhs, depth + 1)
+            print(f"{'\t' * depth}[ APP-LAM-RES ] {result}")
         else:
             result = ('app', e1, tree[2])
+            print(f"{'\t' * depth}[ NON-LAM-APP-RES ] {result}")
     elif tree[0] == 'lam':
-        body = evaluate(tree[2])
+        print(f"{'\t' * depth}[ NON-APP-LAM ]")
+        body = evaluate(tree[2], depth + 1)
         result = ('lam', tree[1], body)
+        print(f"{'\t' * depth}[ NON-APP-LAM-RES ] {result}")
     # elif tree[0] == 'plus':
     #     print(f"PLUSING: {tree}")
     #     result = evaluate(tree[1]) + evaluate(tree[2])
@@ -100,34 +101,44 @@ def evaluate(tree):
     #     return -evaluate(tree[1])
     else:
         result = tree
+        print(f"{'\t' * depth}[ NO-CHANGE-RES ] {result}")
     return result
 
-def evaluate2(tree):
-    print("eval2")
-    print(tree)
+def evaluate2(tree, depth = 0):
+    print(f"{'\t' * depth}[ EVAL-2 ] {tree}")
     if isinstance(tree, (int, float, str)):
-        return tree
-    if isinstance(tree, Tree):
-        return evaluate((tree.data, *tree.children))
-    if tree[0] == 'app':
-        print("APPING")
-        result = evaluate2(evaluate(tree))
-        
+        result = tree
+    elif isinstance(tree, Tree):
+        result = evaluate((tree.data, *tree.children), depth + 1)
+    elif tree[0] == 'app':
+        print(f"{'\t' * depth}[ EVAL-2-APP ]")
+        result = evaluate2(evaluate(tree, depth + 1), depth + 1)
+        print(f"{'\t' * depth}[ EVAL-2-APP-RES ] {result}")
     elif tree[0] == 'plus':
-        print(f"PLUSING: {tree}")
-        result = evaluate2(tree[1]) + evaluate2(tree[2])
+        print(f"{'\t' * depth}[ PLUS ] {tree[1]} + {tree[2]}")
+        result = evaluate2(tree[1], depth + 1) + evaluate2(tree[2], depth + 1)
+        print(f"{'\t' * depth}[ PLUS-RESULT ] {result}")
     elif tree[0] == 'minus':
-        result = evaluate2(tree[1]) - evaluate2(tree[2])
+        print(f"{'\t' * depth}[ MINUS ] {tree[1]} + {tree[2]}")
+        result = evaluate2(tree[1], depth + 1) - evaluate2(tree[2], depth + 1)
+        print(f"{'\t' * depth}[ MINUS-RESULT ] {result}")
     elif tree[0] == 'mul':
-        result = evaluate2(tree[1]) * evaluate2(tree[2])
+        print(f"{'\t' * depth}[ MUL ] {tree[1]} + {tree[2]}")
+        result = evaluate2(tree[1], depth + 1) * evaluate2(tree[2], depth + 1)
+        print(f"{'\t' * depth}[ MUL-RESULT ] {result}")
     elif tree[0] == 'div':
-        result = evaluate2(tree[1]) / evaluate2(tree[2])
+        print(f"{'\t' * depth}[ DIV ] {tree[1]} + {tree[2]}")
+        result = evaluate2(tree[1], depth + 1) / evaluate2(tree[2], depth + 1)
+        print(f"{'\t' * depth}[ DIV-RESULT ] {result}")
     elif tree[0] == 'number':
-        return evaluate2(tree[1])
+        result = evaluate2(tree[1], depth + 1)
     elif tree[0] == 'neg':
-        return -evaluate2(tree[1])
+        print(f"{'\t' * depth}[ NEG ] {tree[1]}")
+        result = -evaluate2(tree[1], depth + 1)
+        print(f"{'\t' * depth}[ NEG-RESULT ] {result}")
     else:
         result = tree
+        print(f"{'\t' * depth}[ NO-CHANGE-RES ] {result}")
     return result
 
 # generate a fresh name 
@@ -145,31 +156,49 @@ name_generator = NameGenerator()
 
 # for beta reduction (capture-avoiding substitution)
 # 'replacement' for 'name' in 'tree'
-def substitute(tree, name, replacement):
+def substitute(tree, name, replacement, depth = 0):
     # tree [replacement/name] = tree with all instances of 'name' replaced by 'replacement'
-    print(f"Subbing {replacement} for {name} in {tree}")
+    print(f"{'\t' * depth}[ SUB ] {replacement} for {name} in {tree}")
     if tree[0] == 'var':
         if tree[1] == name:
-            return replacement # n [r/n] --> r
+            result = replacement # n [r/n] --> r
+            print(f"{'\t' * depth}[ SUB-RES ] {result}")
+            return result
         else:
-            return tree # x [r/n] --> x
+            result = tree # x [r/n] --> x
+            print(f"{'\t' * depth}[ SUB-RES ] {result}")
+            return result
     elif tree[0] == 'lam':
         if tree[1] == name:
-            return tree # \n.e [r/n] --> \n.e
+            result = tree # \n.e [r/n] --> \n.e
+            print(f"{'\t' * depth}[ SUB-RES ] {result}")
+            return result
         else:
             fresh_name = name_generator.generate()
-            return ('lam', fresh_name, substitute(substitute(tree[2], tree[1], ('var', fresh_name)), name, replacement))
+            result = ('lam', fresh_name, substitute(substitute(tree[2], tree[1], ('var', fresh_name), depth + 1), name, replacement, depth + 1))
+            print(f"{'\t' * depth}[ SUB-RES ] {result}")
+            return result
             # \x.e [r/n] --> (\fresh.(e[fresh/x])) [r/n]
     elif tree[0] == 'app':
-        return ('app', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
+        result = ('app', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
+        print(f"{'\t' * depth}[ SUB-RES ] {result}")
+        return result
     elif tree[0] == 'plus':
-        return ('plus', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
+        result = ('plus', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
+        print(f"{'\t' * depth}[ SUB-RES ] {result}")
+        return result
     elif tree[0] == 'mul':
-        return ('mul', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
+        result = ('mul', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
+        print(f"{'\t' * depth}[ SUB-RES ] {result}")
+        return result
     elif tree[0] == 'number':
         if isinstance(tree[1], (float, int)):
-            return ('number', tree[1])
-        return ('number', substitute(tree[1], name, replacement))
+            result = ('number', tree[1])
+            print(f"{'\t' * depth}[ SUB-RES ] {result}")
+            return result
+        result = ('number', substitute(tree[1], name, replacement, depth + 1))
+        print(f"{'\t' * depth}[ SUB-RES ] {result}")
+        return result
     else:
         raise Exception('Unknown tree', tree)
 
@@ -204,7 +233,8 @@ def main():
         expression = input_arg
 
     result = interpret(expression)
-    print(f"\033[95m{result}\033[0m")
+    final_result = f"\033[95m{'FINAL RESULT: ' + str(result)}\033[0m"
+    print(final_result)
 
 if __name__ == "__main__":
     main()
