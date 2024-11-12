@@ -32,18 +32,28 @@ class LambdaCalculusTransformer(Transformer):
         token, = args
         return ('var', str(token))
     
+    def number(self, args):
+        print(f"NUMBER: {args}")
+        token, = args
+        return ('var', float(token))
+    
     def plus(self, args):
-        return ('plus', args[0], args[1])
+        # print(f"PLUS: {args}")
+
+        return ('plus', ('number', args[0][1]), ('number', args[1][1]))
 
     def NAME(self, token):
         return str(token)
+    
+    # def NUMBER(self, token):
+    #     return float(token)
 
-# reduce AST to normal form
 def evaluate(tree):
-    print("TREE: ", tree)
-
-    if tree[0] == 'num':
-        return tree[1]
+    # print(tree)
+    if isinstance(tree, int | float | str):
+        return tree
+    if isinstance(tree, Tree):
+        return evaluate((tree.data, *tree.children))
     if tree[0] == 'app':
         e1 = evaluate(tree[1])
         if e1[0] == 'lam':
@@ -58,10 +68,9 @@ def evaluate(tree):
         body = evaluate(tree[2])
         result = ('lam', tree[1], body)
     elif tree[0] == 'plus':
-        lhs = tree[1].children[0][1] if isinstance(tree, Tree) else evaluate(('num', tree[1]))
-        rhs = tree[2].children[0][1] if isinstance(tree, Tree) else evaluate(('num', tree[2]))
-        print(f"\tLHS: {lhs}\n\tRHS: {rhs}")
-        result = ('num', lhs + rhs)
+        result = ('number', evaluate(tree[1][1]) + evaluate(tree[2][1]))
+    elif tree[0] == 'number':
+        return tree[1]
     else:
         result = tree
     return result
