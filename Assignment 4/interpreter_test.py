@@ -88,7 +88,7 @@ def test_evaluate():
     MAGENTA = '\033[95m'
     RESET = '\033[0m'
 
-    print(linearize(evaluate(ast(r"3 + (5 + 4)"))))
+    print(linearize(evaluate(ast(r"1 + 3 + 5 + (11 + (25 + 52))"))))
     
     # EVAL x == x
     assert linearize(evaluate(ast(r"x"))) == "x"
@@ -117,7 +117,7 @@ def test_evaluate():
     print("\nevaluate(): All tests passed!\n")
 
 def test_interpret():
-    print(f"Testing x --> {interpret('1 + (3 + 5)')}")
+    print(f"Testing x --> {interpret('1 + (3 + 5) + (9 + 11)')}")
     print(f"Testing x y --> {interpret('x y')}")
     input=r"\x.x"; output = interpret(input); print(f"Testing {input} --> {output}")
     input=r"(\x.x) y"; output = interpret(input); print(f"Testing {input} --> {output}")

@@ -33,14 +33,14 @@ class LambdaCalculusTransformer(Transformer):
         return ('var', str(token))
     
     def number(self, args):
-        print(f"NUMBER: {args}")
+        # print(f"NUMBER: {args}")
         token, = args
-        return ('var', float(token))
+        return float(token)
     
     def plus(self, args):
         # print(f"PLUS: {args}")
 
-        return ('plus', args[0], args[1])
+        return ('plus', ('number', args[0]), ('number', args[1]))
 
     def NAME(self, token):
         return str(token)
@@ -68,9 +68,11 @@ def evaluate(tree):
         body = evaluate(tree[2])
         result = ('lam', tree[1], body)
     elif tree[0] == 'plus':
-        result = ('number', evaluate(tree[1]) + evaluate(tree[2]))
+        # print(f"PLUS: \n\t{tree[1]}\n\t{tree[2]}")
+        result = evaluate(tree[1]) + evaluate(tree[2])
+        # print(f"PLUS RESULT: {result}")
     elif tree[0] == 'number':
-        return tree[1]
+        return evaluate(tree[1])
     else:
         result = tree
     return result
@@ -110,6 +112,8 @@ def substitute(tree, name, replacement):
         raise Exception('Unknown tree', tree)
 
 def linearize(ast):
+    if isinstance(ast, int | float | str):
+        return ast
     if ast[0] == 'var':
         return ast[1]
     elif ast[0] == 'lam':
