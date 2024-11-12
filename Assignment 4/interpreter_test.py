@@ -87,6 +87,8 @@ def test_substitute():
 def test_evaluate():
     MAGENTA = '\033[95m'
     RESET = '\033[0m'
+
+    print(linearize(evaluate(ast(r"3 + (5 + 4)"))))
     
     # EVAL x == x
     assert linearize(evaluate(ast(r"x"))) == "x"
