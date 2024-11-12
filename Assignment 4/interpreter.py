@@ -15,7 +15,7 @@ def interpret(source_code):
     return result
 
 # convert concrete syntax to CST
-parser = Lark(open("grammar.lark").read(), parser='lalr')
+parser = Lark(open(r"C:\Users\lewoo\Documents\Chapman\CPSC354\ass4\lambda-calc-assignment\Assignment 4\grammar.lark").read(), parser='lalr')
 
 # convert CST to AST
 class LambdaCalculusTransformer(Transformer):
@@ -33,14 +33,23 @@ class LambdaCalculusTransformer(Transformer):
         return ('var', str(token))
     
     def number(self, args):
-        # print(f"NUMBER: {args}")
         token, = args
         return float(token)
     
     def plus(self, args):
-        # print(f"PLUS: {args}")
-
         return ('plus', ('number', args[0]), ('number', args[1]))
+
+    def minus(self, args):
+        return ('minus', ('number', args[0]), ('number', args[1]))
+    
+    def mul(self, args):
+        return ('mul', ('number', args[0]), ('number', args[1]))
+    
+    def div(self, args):
+        return ('div', ('number', args[0]), ('number', args[1]))
+
+    def neg(self, args):
+        return ('neg', ('number', args[0]))
 
     def NAME(self, token):
         return str(token)
@@ -49,14 +58,20 @@ class LambdaCalculusTransformer(Transformer):
     #     return float(token)
 
 def evaluate(tree):
-    # print(tree)
+    print(tree)
     if isinstance(tree, int | float | str):
         return tree
     if isinstance(tree, Tree):
         return evaluate((tree.data, *tree.children))
     if tree[0] == 'app':
-        e1 = evaluate(tree[1])
+        print(f"UNDER APP : {tree}")
+        print(tree[1])
+        e1 = (tree[1])
+        print("gothisfar")
+        print(e1)
+        print(f"\t{e1}")
         if e1[0] == 'lam':
+            print("SUB TIME")
             body = e1[2]
             name = e1[1]
             argument = evaluate(tree[2])
@@ -68,11 +83,18 @@ def evaluate(tree):
         body = evaluate(tree[2])
         result = ('lam', tree[1], body)
     elif tree[0] == 'plus':
-        # print(f"PLUS: \n\t{tree[1]}\n\t{tree[2]}")
+        print(f"PLUSING: {tree}")
         result = evaluate(tree[1]) + evaluate(tree[2])
-        # print(f"PLUS RESULT: {result}")
+    elif tree[0] == 'minus':
+        result = evaluate(tree[1]) - evaluate(tree[2])
+    elif tree[0] == 'mul':
+        result = evaluate(tree[1]) * evaluate(tree[2])
+    elif tree[0] == 'div':
+        result = evaluate(tree[1]) / evaluate(tree[2])
     elif tree[0] == 'number':
         return evaluate(tree[1])
+    elif tree[0] == 'neg':
+        return -evaluate(tree[1])
     else:
         result = tree
     return result
@@ -94,6 +116,7 @@ name_generator = NameGenerator()
 # 'replacement' for 'name' in 'tree'
 def substitute(tree, name, replacement):
     # tree [replacement/name] = tree with all instances of 'name' replaced by 'replacement'
+    print(f"Subbing {replacement} for {name} in {tree}")
     if tree[0] == 'var':
         if tree[1] == name:
             return replacement # n [r/n] --> r
@@ -108,6 +131,12 @@ def substitute(tree, name, replacement):
             # \x.e [r/n] --> (\fresh.(e[fresh/x])) [r/n]
     elif tree[0] == 'app':
         return ('app', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
+    elif tree[0] == 'plus':
+        return ('plus', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
+    elif tree[0] == 'number':
+        if isinstance(tree[1], float | int):
+            return ('number', tree[1])
+        return ('number', substitute(tree[1], name, replacement))
     else:
         raise Exception('Unknown tree', tree)
 
@@ -127,9 +156,11 @@ def main():
     import sys
     if len(sys.argv) != 2:
         #print("Usage: python interpreter.py <filename or expression>", file=sys.stderr)
-        sys.exit(1)
+        # sys.exit(1)
+        pass
 
-    input_arg = sys.argv[1]
+    # input_arg = sys.argv[1]
+    input_arg = r"C:\Users\lewoo\Documents\Chapman\CPSC354\ass4\lambda-calc-assignment\Assignment 4\test.lc"
 
     if os.path.isfile(input_arg):
         # If the input is a valid file path, read from the file

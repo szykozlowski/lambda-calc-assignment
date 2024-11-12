@@ -4,12 +4,17 @@
       | exp "-" exp1          -> minus
       | exp1
 
-?exp1: "\\" NAME "." exp             -> lam
-      | exp2   
-?exp2: exp2 exp3                    -> app
-      | exp3
-?exp3: NAME                         -> var
+?exp1: exp1 "*" exp2          -> mul
+      | exp1 "/" exp2         -> div
+      | exp2
+
+?exp2: "\\" NAME "." exp             -> lam
+      | exp3   
+?exp3: exp3 exp4                    -> app
+      | exp4
+?exp4: NAME                         -> var
       | NUMBER                      -> number
+      | "-" exp4               -> neg
       | "(" exp ")"   
     
 
