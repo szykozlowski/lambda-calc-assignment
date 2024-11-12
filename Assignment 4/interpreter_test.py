@@ -129,6 +129,6 @@ if __name__ == "__main__":
     # print(Fore.GREEN + "\nTEST EVALUATION\n" + Style.RESET_ALL); test_evaluate()
     # print(Fore.GREEN + "\nTEST INTERPRETATION\n" + Style.RESET_ALL); test_interpret()
 
-    print(linearize(evaluate(ast(r"(\x.x + 1) 5"))))
+    # print(linearize(evaluate(ast(r"(\x.x + 1) 5"))))
     print(f"Testing x --> {interpret('1 + (3 + 5)')}")
 

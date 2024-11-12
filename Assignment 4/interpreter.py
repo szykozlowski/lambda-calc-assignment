@@ -10,12 +10,15 @@ import os
 def interpret(source_code):
     cst = parser.parse(source_code)
     ast = LambdaCalculusTransformer().transform(cst)
-    result_ast = evaluate(ast)
-    result = linearize(result_ast)
-    return result
+    result = evaluate(ast)
+    result2 = evaluate2(result)
+    print(result)
+    print(result2)
+    # result = linearize(result)
+    return result2
 
 # convert concrete syntax to CST
-parser = Lark(open(r"C:\Users\lewoo\Documents\Chapman\CPSC354\ass4\lambda-calc-assignment\Assignment 4\grammar.lark").read(), parser='lalr')
+parser = Lark(open(r"grammar.lark").read(), parser='lalr')
 
 # convert CST to AST
 class LambdaCalculusTransformer(Transformer):
@@ -59,14 +62,14 @@ class LambdaCalculusTransformer(Transformer):
 
 def evaluate(tree):
     print(tree)
-    if isinstance(tree, int | float | str):
+    if isinstance(tree, (int, float, str)):
         return tree
     if isinstance(tree, Tree):
         return evaluate((tree.data, *tree.children))
     if tree[0] == 'app':
         print(f"UNDER APP : {tree}")
         print(tree[1])
-        e1 = (tree[1])
+        e1 = evaluate(tree[1])
         print("gothisfar")
         print(e1)
         print(f"\t{e1}")
@@ -82,19 +85,43 @@ def evaluate(tree):
     elif tree[0] == 'lam':
         body = evaluate(tree[2])
         result = ('lam', tree[1], body)
-    elif tree[0] == 'plus':
+    # elif tree[0] == 'plus':
+    #     print(f"PLUSING: {tree}")
+    #     result = evaluate(tree[1]) + evaluate(tree[2])
+    # elif tree[0] == 'minus':
+    #     result = evaluate(tree[1]) - evaluate(tree[2])
+    # elif tree[0] == 'mul':
+    #     result = evaluate(tree[1]) * evaluate(tree[2])
+    # elif tree[0] == 'div':
+    #     result = evaluate(tree[1]) / evaluate(tree[2])
+    # elif tree[0] == 'number':
+    #     return evaluate(tree[1])
+    # elif tree[0] == 'neg':
+    #     return -evaluate(tree[1])
+    else:
+        result = tree
+    return result
+
+def evaluate2(tree):
+    print(tree)
+    if isinstance(tree, (int, float, str)):
+        return tree
+    if isinstance(tree, Tree):
+        return evaluate((tree.data, *tree.children))
+
+    if tree[0] == 'plus':
         print(f"PLUSING: {tree}")
-        result = evaluate(tree[1]) + evaluate(tree[2])
+        result = evaluate2(tree[1]) + evaluate2(tree[2])
     elif tree[0] == 'minus':
-        result = evaluate(tree[1]) - evaluate(tree[2])
+        result = evaluate2(tree[1]) - evaluate2(tree[2])
     elif tree[0] == 'mul':
-        result = evaluate(tree[1]) * evaluate(tree[2])
+        result = evaluate2(tree[1]) * evaluate2(tree[2])
     elif tree[0] == 'div':
-        result = evaluate(tree[1]) / evaluate(tree[2])
+        result = evaluate2(tree[1]) / evaluate2(tree[2])
     elif tree[0] == 'number':
-        return evaluate(tree[1])
+        return evaluate2(tree[1])
     elif tree[0] == 'neg':
-        return -evaluate(tree[1])
+        return -evaluate2(tree[1])
     else:
         result = tree
     return result
@@ -134,14 +161,14 @@ def substitute(tree, name, replacement):
     elif tree[0] == 'plus':
         return ('plus', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
     elif tree[0] == 'number':
-        if isinstance(tree[1], float | int):
+        if isinstance(tree[1], (float, int)):
             return ('number', tree[1])
         return ('number', substitute(tree[1], name, replacement))
     else:
         raise Exception('Unknown tree', tree)
 
 def linearize(ast):
-    if isinstance(ast, int | float | str):
+    if isinstance(ast, (int, float, str)):
         return ast
     if ast[0] == 'var':
         return ast[1]
@@ -160,7 +187,7 @@ def main():
         pass
 
     # input_arg = sys.argv[1]
-    input_arg = r"C:\Users\lewoo\Documents\Chapman\CPSC354\ass4\lambda-calc-assignment\Assignment 4\test.lc"
+    input_arg = r"test.lc"
 
     if os.path.isfile(input_arg):
         # If the input is a valid file path, read from the file
