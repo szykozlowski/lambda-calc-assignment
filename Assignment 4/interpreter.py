@@ -103,13 +103,17 @@ def evaluate(tree):
     return result
 
 def evaluate2(tree):
+    print("eval2")
     print(tree)
     if isinstance(tree, (int, float, str)):
         return tree
     if isinstance(tree, Tree):
         return evaluate((tree.data, *tree.children))
-
-    if tree[0] == 'plus':
+    if tree[0] == 'app':
+        print("APPING")
+        result = evaluate2(evaluate(tree))
+        
+    elif tree[0] == 'plus':
         print(f"PLUSING: {tree}")
         result = evaluate2(tree[1]) + evaluate2(tree[2])
     elif tree[0] == 'minus':
@@ -160,6 +164,8 @@ def substitute(tree, name, replacement):
         return ('app', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
     elif tree[0] == 'plus':
         return ('plus', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
+    elif tree[0] == 'mul':
+        return ('mul', substitute(tree[1], name, replacement), substitute(tree[2], name, replacement))
     elif tree[0] == 'number':
         if isinstance(tree[1], (float, int)):
             return ('number', tree[1])
