@@ -40,7 +40,7 @@ class LambdaCalculusTransformer(Transformer):
     def plus(self, args):
         # print(f"PLUS: {args}")
 
-        return ('plus', ('number', args[0][1]), ('number', args[1][1]))
+        return ('plus', args[0], args[1])
 
     def NAME(self, token):
         return str(token)
@@ -68,7 +68,7 @@ def evaluate(tree):
         body = evaluate(tree[2])
         result = ('lam', tree[1], body)
     elif tree[0] == 'plus':
-        result = ('number', evaluate(tree[1][1]) + evaluate(tree[2][1]))
+        result = ('number', evaluate(tree[1]) + evaluate(tree[2]))
     elif tree[0] == 'number':
         return tree[1]
     else:
