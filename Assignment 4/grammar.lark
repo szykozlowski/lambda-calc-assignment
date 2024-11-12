@@ -8,8 +8,6 @@
       | exp2   
 ?exp2: exp2 exp3                    -> app
       | exp3
-?exp4: NUMBER                   -> num
-      | "(" exp1 ")"
 ?exp3: NAME                         -> var
       | NUMBER                      -> number
       | "(" exp ")"   

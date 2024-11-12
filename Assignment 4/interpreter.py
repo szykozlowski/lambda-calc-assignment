@@ -22,8 +22,8 @@ class LambdaCalculusTransformer(Transformer):
     def lam(self, args):
         name, body = args
         return ('lam', str(name), body)
-    def NUMBER(self, args):
-        return 'num', float(args[0])
+    # def NUMBER(self, args):
+    #     return 'num', float(args[0])
     def app(self, args):
         new_args = [(arg.data, arg.children[0]) if isinstance(arg, Tree) and arg.data == 'int' else arg for arg in args]
         return ('app', *new_args)
