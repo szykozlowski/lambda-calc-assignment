@@ -30,27 +30,48 @@ class LambdaCalculusTransformer(Transformer):
     def var(self, args):
         token, = args
         return ('var', str(token))
+    
+    def number(self, args):
+        print(f"NUMBER: {args}")
+        token, = args
+        return ('var', float(token))
+    
+    def plus(self, args):
+        # print(f"PLUS: {args}")
+
+        return ('plus', ('number', args[0][1]), ('number', args[1][1]))
 
     def NAME(self, token):
         return str(token)
+    
+    # def NUMBER(self, token):
+    #     return float(token)
 
-# reduce AST to normal form
 def evaluate(tree):
+    # print(tree)
+    if isinstance(tree, int | float | str):
+        return tree
+    if isinstance(tree, Tree):
+        return evaluate((tree.data, *tree.children))
     if tree[0] == 'app':
         e1 = evaluate(tree[1])
         if e1[0] == 'lam':
             body = e1[2]
             name = e1[1]
-            arg = tree[2]
-            rhs = substitute(body, name, arg)
-            result = evaluate(rhs)
-            pass
+            argument = evaluate(tree[2])
+            rhs = substitute(body, name, argument)
+            result = evaluate(rhs) 
         else:
             result = ('app', e1, tree[2])
-            pass
+    elif tree[0] == 'lam':
+        body = evaluate(tree[2])
+        result = ('lam', tree[1], body)
+    elif tree[0] == 'plus':
+        result = ('number', evaluate(tree[1][1]) + evaluate(tree[2][1]))
+    elif tree[0] == 'number':
+        return tree[1]
     else:
         result = tree
-        pass
     return result
 
 # generate a fresh name 
