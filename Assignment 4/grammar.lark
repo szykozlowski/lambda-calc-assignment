@@ -19,7 +19,15 @@
 ?exp5: NAME                         -> var
       | NUMBER                      -> number
       | "(" exp ")"   
-    
+
+?exp6: "if" exp "then" exp "else" exp     -> if
+      | exp "<=" exp                      -> leq
+      | exp "==" exp                      -> eq
+      | exp7
+
+?exp7: "let" NAME "=" exp "in" exp        -> let
+      | "letrec" NAME "=" exp "in" exp    -> rec
+      | "fix" exp                         -> fix
 
 NAME: /[a-z_][a-zA-Z0-9_]*/
 NUMBER: /\d+(\.\d+)?/    

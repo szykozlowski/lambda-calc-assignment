@@ -186,6 +186,10 @@ def substitute(tree, name, replacement, depth = 0):
         result = ('number', substitute(tree[1], name, replacement, depth + 1))
         print(f"{'\t' * depth}[ SUB-RES ] {result}")
         return result
+    elif tree[0] == 'neg':
+        result = tree
+        print(f"{'\t' * depth}[ SUB-RES ] {result}")
+        return result
     else:
         raise Exception('Unknown tree', tree)
 
