@@ -117,12 +117,21 @@ def evaluate2(tree, depth = 0):
         print(f"{'\t' * depth}[ DIV ] {tree[1]} + {tree[2]}")
         result = evaluate2(tree[1], depth + 1) / evaluate2(tree[2], depth + 1)
         print(f"{'\t' * depth}[ DIV-RESULT ] {result}")
+    elif tree[0] == 'leq':
+        result = evaluate2(tree[1], depth + 1) <= evaluate2(tree[2], depth + 1)
+    elif tree[0] == 'eq':
+        result = evaluate2(tree[1], depth + 1) == evaluate2(tree[2], depth + 1)
     elif tree[0] == 'number':
         result = evaluate2(tree[1], depth + 1)
     elif tree[0] == 'neg':
         print(f"{'\t' * depth}[ NEG ] {tree[1]}")
         result = -evaluate2(tree[1], depth + 1)
         print(f"{'\t' * depth}[ NEG-RESULT ] {result}")
+    elif tree[0] == "if":
+        if evaluate2(tree[1], depth + 1):
+            result = evaluate2(tree[2], depth + 1)
+        else:
+            result = evaluate2(tree[3], depth + 1)
     else:
         result = tree
         print(f"{'\t' * depth}[ NO-CHANGE-RES ] {result}")
