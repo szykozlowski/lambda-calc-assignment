@@ -53,6 +53,32 @@ class LambdaCalculusTransformer(Transformer):
 
     def neg(self, args):
         return ('neg', ('number', args[0]))
+    
+    def if_(self, args):
+        return ('if', ('number', args[0]), ('number', args[1]), ('number', args[2]))
+    
+    def leq(self, args):
+        # Handles: exp <= exp
+        return ('leq', ('exp', args[0]), ('exp', args[1]))
+    
+    def eq(self, args):
+        # Handles: exp == exp
+        return ('eq', ('exp', args[0]), ('exp', args[1]))
+    
+    def let(self, args):
+        # Handles: let NAME = exp in exp
+        name, expr1, expr2 = args
+        return ('let', ("name", str(name)), ("exp", expr1), ("exp", expr2))
+    
+    def rec(self, args):
+        # Handles: letrec NAME = exp in exp
+        name, expr1, expr2 = args
+        return ('letrec', ("name", str(name)), ("exp", expr1), ("exp", expr2))
+    
+    def fix(self, args):
+        # Handles: fix exp
+        return ('fix', ('exp', args[0]))
+    
 
     def NAME(self, token):
         return str(token)
@@ -132,6 +158,12 @@ def evaluate2(tree, depth = 0):
             result = evaluate2(tree[2], depth + 1)
         else:
             result = evaluate2(tree[3], depth + 1)
+    elif tree[0] == "let":
+        result = evaluate2([tree[1], depth + 1])
+    elif tree[0] == "rec":      # rec NAME = exp in exp, run this recursively
+        result = evaluate2([tree[1], depth + 1])
+    elif tree[0] == "fix":
+        result = evaluate2(tree[1], depth + 1) ## IDK HOW THIS IS SUPPOSED TO WORK
     else:
         result = tree
         print(f"{'\t' * depth}[ NO-CHANGE-RES ] {result}")
@@ -198,6 +230,26 @@ def substitute(tree, name, replacement, depth = 0):
     elif tree[0] == 'neg':
         result = tree
         print(f"{'\t' * depth}[ SUB-RES ] {result}")
+        return result
+    elif tree[0] == 'if':
+        result = ('if', substitute(tree[1], name, replacement),
+                        substitute(tree[2], name, replacement),
+                        substitute(tree[3], name, replacement))
+        return result
+    elif tree[0] == 'leq':
+        result = (tree[0], substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
+        return result
+    elif tree[0] == 'eq':
+        result = (tree[0], substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
+        return result
+    elif tree[0] == 'let':
+        result = ('let', tree[1], substitute(tree[2], name, replacement), substitute(tree[3], name, replacement))
+        return result
+    elif tree[0] == 'rec':
+        result = ('rec', tree[1], substitute(tree[2], name, replacement), substitute(tree[3], name, replacement))
+        return result
+    elif tree[0] == 'fix':
+        result = (tree[0], substitute(tree[1], name, replacement))
         return result
     else:
         raise Exception('Unknown tree', tree)
