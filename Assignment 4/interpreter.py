@@ -12,9 +12,11 @@ def interpret(source_code):
     cst = parser.parse(source_code)
     ast = LambdaCalculusTransformer().transform(cst)
     result = evaluate(ast)
-    print(Fore.GREEN + f"\nPRE-OPERATIONS RESULT (Normalized AST)\n{result}\n" + Style.RESET_ALL)
+    
+    print(Fore.GREEN + "\nPRE-OPERATIONS RESULT (Normalized AST)\n"); print(result); print("\n" + Style.RESET_ALL)
     result2 = evaluate2(result)
     print(Fore.GREEN + f"\nPOST-OPERATIONS RESULT\n{result2}\n" + Style.RESET_ALL)
+    print(Fore.GREEN + "\nPOST-OPERATIONS RESULT\n"); print(result2); print("\n" + Style.RESET_ALL)
     return result2
 
 # convert concrete syntax to CST
@@ -55,7 +57,7 @@ class LambdaCalculusTransformer(Transformer):
         return ('neg', ('number', args[0]))
     
     def if_(self, args):
-        return ('if', ('number', args[0]), ('number', args[1]), ('number', args[2]))
+        return ('if_', ('exp', args[0]), ('exp', args[1]), ('exp', args[2]))
     
     def leq(self, args):
         # Handles: exp <= exp
@@ -68,12 +70,12 @@ class LambdaCalculusTransformer(Transformer):
     def let(self, args):
         # Handles: let NAME = exp in exp
         name, expr1, expr2 = args
-        return ('let', ("name", str(name)), ("exp", expr1), ("exp", expr2))
+        return ('let', ("var", str(name)), ("exp", expr1), ("exp", expr2))
     
     def rec(self, args):
         # Handles: letrec NAME = exp in exp
         name, expr1, expr2 = args
-        return ('letrec', ("name", str(name)), ("exp", expr1), ("exp", expr2))
+        return ('letrec', ("var", str(name)), ("exp", expr1), ("exp", expr2))
     
     def fix(self, args):
         # Handles: fix exp
@@ -153,17 +155,32 @@ def evaluate2(tree, depth = 0):
         print(f"{'\t' * depth}[ NEG ] {tree[1]}")
         result = -evaluate2(tree[1], depth + 1)
         print(f"{'\t' * depth}[ NEG-RESULT ] {result}")
-    elif tree[0] == "if":
-        if evaluate2(tree[1], depth + 1):
+    elif tree[0] == "if_":
+        res_1 = evaluate2(tree[1], depth + 1)
+        if not (res_1 == 0):
             result = evaluate2(tree[2], depth + 1)
         else:
             result = evaluate2(tree[3], depth + 1)
-    elif tree[0] == "let":
-        result = evaluate2([tree[1], depth + 1])
+    elif tree[0] == "let":      # named var substitution
+        _, (name_type, name), (_, expr1), (_, expr2) = tree
+        value = evaluate2(expr1, depth + 1)
+        substituted_expr2 = substitute(expr2, name, value, depth + 1)
+        result = evaluate2(substituted_expr2, depth + 1)
     elif tree[0] == "rec":      # rec NAME = exp in exp, run this recursively
-        result = evaluate2([tree[1], depth + 1])
+        _, (name_type, name), (_, expr1), (_, expr2) = tree
+        # Substitute the variable itself (recursive definition)
+        recursive_expr = substitute(expr1, name, ('fix', ('exp', expr1)), depth + 1)
+        substituted_expr2 = substitute(expr2, name, recursive_expr, depth + 1)
+        result = evaluate2(substituted_expr2, depth + 1)
     elif tree[0] == "fix":
-        result = evaluate2(tree[1], depth + 1) ## IDK HOW THIS IS SUPPOSED TO WORK
+        func = evaluate2(tree[1], depth + 1)
+        if func[0] == 'lam':  # Ensure `func` is a lambda (should it be an app and self apply???)
+            _, param, body = func
+            substituted_body = substitute(body, param, ('fix', ('exp', func)), depth + 1)
+            result = evaluate2(substituted_body, depth + 1)
+        else:
+            raise ValueError(f"Expected a lambda function in 'fix', got {func}")
+        # result = evaluate2(tree[1], depth + 1) # this substitutes for a fixed point operator thing
     else:
         result = tree
         print(f"{'\t' * depth}[ NO-CHANGE-RES ] {result}")

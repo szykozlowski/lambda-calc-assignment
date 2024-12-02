@@ -5,8 +5,8 @@ Outside the comments only one program is allowed.
 
 // (\x.x)a
 
-letrec f = \n. if n==0 then 1 else n*f(n-1) in f 4, 24.0
-//if 0 then 2 else 1
+//letrec f = \n. if n==0 then 1 else n*f(n-1) in f 4 24.0
+if 0 == 0 then 2 else 1
 //(\x.x * x) ((-2) * (-3))
 //(\x.\y.\z.(x + y) * z) 3 4 5
 //(\x.\y.x+y) (-3) 5

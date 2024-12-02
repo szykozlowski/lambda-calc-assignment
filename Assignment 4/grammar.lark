@@ -20,7 +20,7 @@
       | NUMBER                      -> number
       | "(" exp ")"   
 
-?exp6: "if" exp "then" exp "else" exp     -> if
+?exp6: "if" exp "then" exp "else" exp     -> if_
       | exp "<=" exp                      -> leq
       | exp "==" exp                      -> eq
       | exp7
