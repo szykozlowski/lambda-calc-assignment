@@ -21,7 +21,7 @@ debug = True
 log = True
 
 # convert concrete syntax to CST
-if (debug): parser = Lark(open(r"C:\Users\lewoo\Documents\Chapman\CPSC354\ass4\lambda-calc-assignment\Assignment 4\grammar.lark").read(), parser='lalr')
+if (debug): parser = Lark(open(r"grammar.lark").read(), parser='lalr')
 else: parser = Lark(open(r"grammar.lark").read(), parser='lalr')
 
 # convert CST to AST
@@ -63,7 +63,10 @@ class LambdaCalculusTransformer(Transformer):
         return str(token)
     
     def let(self, args):
-        return ('let', args[0], ('var', args[1]), ('var', args[2]))
+        print("TESTING")
+        print(args[1])
+        print(args[2])
+        return ('let', args[0], ('var', args[1]), ('var',args[2]))
 
     def rec(self, args):
         return ('rec', args[0], ('var', args[1]), ('var', args[2]))
@@ -157,13 +160,18 @@ def evaluate2(tree, depth = 0):
     elif tree[0] == 'number':
         result = evaluate2(tree[1], depth + 1)
     elif tree[0] == 'eq':
-        result = (float)(tree[1][1] == tree[2][1])
+        result = (float)(tree[1] == tree[2][1])
     elif tree[0] == 'leq':
         result = (float)(tree[1][1] <= tree[2][1])
     elif tree[0] == 'let':
         print("LETTING")
+        print(tree)
+        print(tree[2])
         print(tree[3])
-        result = evaluate2(substitute(tree[3][1], tree[1], ('var', tree[2][1])))
+
+        ## SPEIAL TEMP CASE FOR LAME WHEN  ('let', 'g', ('lam', 'Var1', ('plus', ('number', 'Var1'), ('number', 1.0)))
+
+        result = evaluate2(substitute(tree[3][1], tree[1], (tree[2][1])))
     elif tree[0] == 'neg':
         if(log): print(f"{'\t' * depth}[ NEG ] {tree[1]}")
         result = -evaluate2(tree[1], depth + 1)
@@ -197,34 +205,27 @@ name_generator = NameGenerator()
 # for beta reduction (capture-avoiding substitution)
 # 'replacement' for 'name' in 'tree'
 def substitute(tree, name, replacement, depth = 0):
+    print("tree: " + str(tree))
+    print("replacement: " + str(replacement))
+    print("name: " + str(name))
     # tree [replacement/name] = tree with all instances of 'name' replaced by 'replacement'
-    print("-------------------")
-    print(tree)
-    print("-------------------")
     if(log): print(f"{'\t' * depth}[ SUB ] {replacement} for {name} in {tree}")
+    if(isinstance(tree, float)):
+        return tree
     if (tree == replacement or tree == name): result = tree
-    elif tree[0] == 'var':
-        print("g;ot this far")
-        print(tree)
-        if tree[1] == name:
-
+    if tree[0] == 'var':
+        if tree[1] == name:            
             result = replacement # n [r/n] --> r
             if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
+
             return result
-        # elif tree[1][0] == 'if':
-        #     print("augh")
-        #     result = substitute(tree[1][1],name,replacement)
-        # elif tree[1][0] == 'eq':
-        #     print("augh")
-        #     result = substitute(tree[1][1],name,replacement)
-        # elif tree[1][0] == 'var':
-        #     print("augh")
-        #     print(tree)
-        #     print("augh")
-        #     result = substitute(tree[1][1],name,replacement)
+        elif not isinstance(tree[1], float):
+            result = substitute(tree[1],name,replacement)
         else:
             result = tree # x [r/n] --> x
             if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
+            print("RESULTING")
+            print(result)
             return result
     elif tree[0] == 'lam':
         if tree[1] == name:
@@ -241,19 +242,27 @@ def substitute(tree, name, replacement, depth = 0):
         result = ('app', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
         if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
         return result
+    elif tree[0] == 'let':
+        result = ('let',tree[1], substitute(tree[2], name, replacement, depth + 1), substitute(tree[3], name, replacement, depth + 1))
+        if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
+        return result
     elif tree[0] == 'plus':
         result = ('plus', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
         if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
         return result
     elif tree[0] == 'if':
+        print(substitute(tree[1], name, replacement, depth + 1))
         result = ('if', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1), substitute(tree[3], name, replacement, depth + 1))
         if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
         return result
     elif tree[0] == 'eq':
-        result = ('eq', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1), substitute(tree[3], name, replacement, depth + 1))
+        
+        result = ('eq', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
         if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
+
+        return result
     elif tree[0] == 'leq':
-        result = ('leq', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1), substitute(tree[3], name, replacement, depth + 1))
+        result = ('leq', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
         if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
     elif tree[0] == 'mul':
         result = ('mul', substitute(tree[1], name, replacement, depth + 1), substitute(tree[2], name, replacement, depth + 1))
@@ -272,8 +281,9 @@ def substitute(tree, name, replacement, depth = 0):
         if(log): print(f"{'\t' * depth}[ SUB-RES ] {result}")
         return result
     else:
-        raise Exception('Unknown tree', tree)
-
+        result = tree
+    print(tree)
+    return result
 def linearize(ast):
     if isinstance(ast, (int, float, str)):
         return ast
@@ -294,7 +304,7 @@ def main():
         pass
 
     # input_arg = sys.argv[1]
-    if (debug): input_arg = r"C:\Users\lewoo\Documents\Chapman\CPSC354\ass4\lambda-calc-assignment\Assignment 4\test.lc"
+    if (debug): input_arg = r"test.lc"
     else: input_arg = r"test.lc"
 
     if os.path.isfile(input_arg):
