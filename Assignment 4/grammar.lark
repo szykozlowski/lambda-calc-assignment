@@ -2,6 +2,7 @@
 
 ?exp: exp "+" exp1             -> plus
       | exp "-" exp1          -> minus
+      | exp6 
       | exp1
 
 ?exp1: exp1 "*" exp2          -> mul
@@ -18,9 +19,9 @@
       | exp5
 ?exp5: NAME                         -> var
       | NUMBER                      -> number
-      | "(" exp ")"   
+      | "(" exp ")"
 
-?exp6: "if" exp "then" exp "else" exp     -> if_
+?exp6: "if" exp "then" exp "else" exp -> if_
       | exp "<=" exp                      -> leq
       | exp "==" exp                      -> eq
       | exp7
@@ -29,8 +30,12 @@
       | "letrec" NAME "=" exp "in" exp    -> rec
       | "fix" exp                         -> fix
 
+
+
 NAME: /[a-z_][a-zA-Z0-9_]*/
 NUMBER: /\d+(\.\d+)?/    
+
+
 
 
 %import common.WS
